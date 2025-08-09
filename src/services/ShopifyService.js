@@ -8,6 +8,15 @@ const SHOPIFY_CONFIG = {
   apiVersion: import.meta.env.VITE_SHOPIFY_API_VERSION || '2024-07'
 }
 
+// Debug logging for production
+console.log('🔧 Shopify Config:', {
+  domain: SHOPIFY_CONFIG.storeDomain,
+  hasToken: !!SHOPIFY_CONFIG.storefrontAccessToken,
+  tokenLength: SHOPIFY_CONFIG.storefrontAccessToken?.length || 0,
+  apiVersion: SHOPIFY_CONFIG.apiVersion,
+  environment: import.meta.env.MODE
+})
+
 const STOREFRONT_API_URL = `https://${SHOPIFY_CONFIG.storeDomain}/api/${SHOPIFY_CONFIG.apiVersion}/graphql.json`
 
 // GraphQL query for fetching products (simplified for debugging)
@@ -109,11 +118,18 @@ class ShopifyService {
     console.log('🔍 Starting getProducts with config:', {
       domain: SHOPIFY_CONFIG.storeDomain,
       apiVersion: SHOPIFY_CONFIG.apiVersion,
-      url: STOREFRONT_API_URL
+      url: STOREFRONT_API_URL,
+      hasValidToken: SHOPIFY_CONFIG.storefrontAccessToken !== 'your-storefront-access-token'
     })
 
+    // Check if credentials are properly configured
+    if (SHOPIFY_CONFIG.storeDomain === 'your-store-name.myshopify.com' || 
+        SHOPIFY_CONFIG.storefrontAccessToken === 'your-storefront-access-token') {
+      throw new Error('Environment variables not configured. Please set VITE_SHOPIFY_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN in your deployment platform.')
+    }
+
     try {
-      console.log('📡 Making API request...')
+      console.log('📡 Making API request to:', STOREFRONT_API_URL)
       const response = await axios.post(
         STOREFRONT_API_URL,
         {
@@ -124,11 +140,12 @@ class ShopifyService {
           headers: {
             'Content-Type': 'application/json',
             'X-Shopify-Storefront-Access-Token': SHOPIFY_CONFIG.storefrontAccessToken
-          }
+          },
+          timeout: 10000 // 10 second timeout
         }
       )
 
-      console.log('✅ API Response received:', response.data)
+      console.log('✅ API Response received:', response.status, response.statusText)
 
       if (response.data.errors) {
         console.error('❌ GraphQL Errors:', response.data.errors)
@@ -136,15 +153,24 @@ class ShopifyService {
       }
 
       const products = this.formatShopifyProducts(response.data.data.products.edges)
-      console.log('🎯 Formatted products:', products)
+      console.log('🎯 Formatted products count:', products.length)
       return products
     } catch (error) {
       console.error('💥 Error fetching from Shopify:', error)
       if (error.response) {
-        console.error('📋 Error response:', error.response.data)
-        console.error('📊 Error status:', error.response.status)
+        console.error('📋 Error response:', error.response.status, error.response.data)
       }
-      throw error
+      
+      // Provide better error messages for production
+      if (error.code === 'ENOTFOUND' || error.code === 'ENETUNREACH') {
+        throw new Error('Network connection failed. Please check your internet connection.')
+      } else if (error.response?.status === 401) {
+        throw new Error('Invalid Shopify access token. Please check your credentials.')
+      } else if (error.response?.status === 404) {
+        throw new Error('Shopify store not found. Please check your store domain.')
+      } else {
+        throw new Error(error.message || 'Failed to connect to Shopify API')
+      }
     }
   }
 
