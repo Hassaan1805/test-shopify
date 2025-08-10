@@ -1,11 +1,33 @@
 import axios from 'axios'
 
 // Shopify Storefront API configuration
+// Alternative configuration for Cloudflare Pages
+const getShopifyConfig = () => {
+  // Try multiple ways to get environment variables
+  const domain = import.meta.env.VITE_SHOPIFY_DOMAIN || 
+                import.meta.env.SHOPIFY_DOMAIN || 
+                process.env.VITE_SHOPIFY_DOMAIN ||
+                'your-store-name.myshopify.com'
+                
+  const token = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN || 
+               import.meta.env.SHOPIFY_STOREFRONT_TOKEN ||
+               process.env.VITE_SHOPIFY_STOREFRONT_TOKEN ||
+               'your-storefront-access-token'
+               
+  const version = import.meta.env.VITE_SHOPIFY_API_VERSION ||
+                 import.meta.env.SHOPIFY_API_VERSION ||
+                 process.env.VITE_SHOPIFY_API_VERSION ||
+                 '2024-07'
+  
+  return { domain, token, version }
+}
+
+const { domain, token, version } = getShopifyConfig()
+
 const SHOPIFY_CONFIG = {
-  // Use environment variables in production, fallback to hardcoded values for development
-  storeDomain: import.meta.env.VITE_SHOPIFY_DOMAIN || 'your-store-name.myshopify.com',
-  storefrontAccessToken: import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN || 'your-storefront-access-token',
-  apiVersion: import.meta.env.VITE_SHOPIFY_API_VERSION || '2024-07'
+  storeDomain: domain,
+  storefrontAccessToken: token,
+  apiVersion: version
 }
 
 // Debug logging for production
@@ -14,7 +36,8 @@ console.log('🔧 Shopify Config:', {
   hasToken: !!SHOPIFY_CONFIG.storefrontAccessToken,
   tokenLength: SHOPIFY_CONFIG.storefrontAccessToken?.length || 0,
   apiVersion: SHOPIFY_CONFIG.apiVersion,
-  environment: import.meta.env.MODE
+  environment: import.meta.env.MODE,
+  isProduction: import.meta.env.PROD
 })
 
 const STOREFRONT_API_URL = `https://${SHOPIFY_CONFIG.storeDomain}/api/${SHOPIFY_CONFIG.apiVersion}/graphql.json`

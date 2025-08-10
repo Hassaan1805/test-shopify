@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environment Test</title>
+</head>
+<body>
+    <h1>Environment Variables Test</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output')
+        
+        const envInfo = {
+            mode: import.meta.env.MODE,
+            prod: import.meta.env.PROD,
+            dev: import.meta.env.DEV,
+            domain: import.meta.env.VITE_SHOPIFY_DOMAIN,
+            hasToken: !!import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
+            apiVersion: import.meta.env.VITE_SHOPIFY_API_VERSION,
+            allKeys: Object.keys(import.meta.env)
+        }
+        
+        output.innerHTML = `
+            <pre>${JSON.stringify(envInfo, null, 2)}</pre>
+            <hr>
+            <h3>All Environment Variables:</h3>
+            <pre>${JSON.stringify(import.meta.env, null, 2)}</pre>
+        `
+        
+        console.log('Environment Info:', envInfo)
+    </script>
+</body>
+</html>

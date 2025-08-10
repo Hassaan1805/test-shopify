@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import ProductGrid from './components/ProductGrid'
 import ShopifyService from './services/ShopifyService'
+import { debugEnv } from './debug-env'
 
 function App() {
   const [products, setProducts] = useState([])
@@ -11,6 +12,9 @@ function App() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    // Debug environment variables
+    console.log('🐛 Debug Environment:', debugEnv())
+    
     const fetchInitialData = async () => {
       try {
         setLoading(true)
@@ -29,7 +33,7 @@ function App() {
         
       } catch (err) {
         console.error('💥 Error in fetchInitialData:', err)
-        if (err.message.includes('configure your Shopify credentials')) {
+        if (err.message.includes('configure your Shopify credentials') || err.message.includes('Environment variables not configured')) {
           setError({
             type: 'config',
             message: 'Shopify credentials not configured',
