@@ -9,14 +9,14 @@ const getShopifyConfig = () => {
                 import.meta.env.SHOPIFY_DOMAIN || 
                 process.env.VITE_SHOPIFY_STORE_DOMAIN ||
                 process.env.VITE_SHOPIFY_DOMAIN ||
-                'your-store-name.myshopify.com'
+                'j61hwx-j0.myshopify.com'
                 
   const token = import.meta.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN || 
                import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN ||
                import.meta.env.SHOPIFY_STOREFRONT_TOKEN ||
                process.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
                process.env.VITE_SHOPIFY_STOREFRONT_TOKEN ||
-               'your-storefront-access-token'
+               '09792ed6ce41c02ef3db4e88e860f82f'
                
   const version = import.meta.env.VITE_SHOPIFY_API_VERSION ||
                  import.meta.env.SHOPIFY_API_VERSION ||
@@ -146,12 +146,11 @@ class ShopifyService {
       domain: SHOPIFY_CONFIG.storeDomain,
       apiVersion: SHOPIFY_CONFIG.apiVersion,
       url: STOREFRONT_API_URL,
-      hasValidToken: SHOPIFY_CONFIG.storefrontAccessToken !== 'your-storefront-access-token'
+      hasValidToken: !!SHOPIFY_CONFIG.storefrontAccessToken
     })
 
-    // Check if credentials are properly configured
-    if (SHOPIFY_CONFIG.storeDomain === 'your-store-name.myshopify.com' || 
-        SHOPIFY_CONFIG.storefrontAccessToken === 'your-storefront-access-token') {
+    // Check if credentials are properly configured (only block if completely missing)
+    if (!SHOPIFY_CONFIG.storeDomain || !SHOPIFY_CONFIG.storefrontAccessToken) {
       throw new Error('Environment variables not configured. Please set VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN in your deployment platform.')
     }
 
