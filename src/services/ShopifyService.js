@@ -4,13 +4,17 @@ import axios from 'axios'
 // Alternative configuration for Cloudflare Pages
 const getShopifyConfig = () => {
   // Try multiple ways to get environment variables
-  const domain = import.meta.env.VITE_SHOPIFY_DOMAIN || 
+  const domain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || 
+                import.meta.env.VITE_SHOPIFY_DOMAIN || 
                 import.meta.env.SHOPIFY_DOMAIN || 
+                process.env.VITE_SHOPIFY_STORE_DOMAIN ||
                 process.env.VITE_SHOPIFY_DOMAIN ||
                 'your-store-name.myshopify.com'
                 
-  const token = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN || 
+  const token = import.meta.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN || 
+               import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN ||
                import.meta.env.SHOPIFY_STOREFRONT_TOKEN ||
+               process.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
                process.env.VITE_SHOPIFY_STOREFRONT_TOKEN ||
                'your-storefront-access-token'
                
@@ -148,7 +152,7 @@ class ShopifyService {
     // Check if credentials are properly configured
     if (SHOPIFY_CONFIG.storeDomain === 'your-store-name.myshopify.com' || 
         SHOPIFY_CONFIG.storefrontAccessToken === 'your-storefront-access-token') {
-      throw new Error('Environment variables not configured. Please set VITE_SHOPIFY_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN in your deployment platform.')
+      throw new Error('Environment variables not configured. Please set VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN in your deployment platform.')
     }
 
     try {
